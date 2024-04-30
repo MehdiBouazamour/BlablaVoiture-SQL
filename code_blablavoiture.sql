@@ -1,5 +1,5 @@
 
---1 Show trip information for trips that started in Toulouse, Lyon or Bordeaux
+--1 Afficher les informations sur les voyages qui ont commencé à Toulouse, Lyon ou Bordeaux.
 
 -- Ici, nous voulons les informations contenus dans la table rides
 -- Cependant les noms de villes ne sont pas stockés directement dans la table, on peut les retrouver dans la table city
@@ -16,7 +16,7 @@ INNER JOIN cities
 WHERE cities.city_name  IN ('Toulouse', 'Lyon', 'Bordeaux');
 
 
---2 The number of accepted rides? Pending? Refused?
+--2 Le nombre de trajets acceptés ? En attente ? Refusés ?
 
 -- Pour comprendre, il faut bien lire la documentation de la base de données, la table requests comporte un attribut request_status 
 -- Il existe aussi une table request_status, avec seulement  3 lignes et 2 colonnes  d'ID 1,2 et 3 auquel correspond le type de requete: pending, Approved, Rejected
@@ -41,7 +41,7 @@ INNER JOIN request_status rs
 	ON r.request_status = rs.request_status_id 
 GROUP BY r.request_status;
 
---3 Show the average price per passenger per city of arrival, order by ascending number
+--3 Afficher le prix moyen par passager par ville de destination, ordonné par nombre croissant.
 
 -- Le cas de figure ressemble, on sait qu'on va devoir utiliser la fonction d'agrégation AVG() sur l'attribut contribution_per_passenger 
 -- On sait aussi qu'on doit faire la moyenne par villes d'arrivée, on doit donc séparer la table en groupe de villes d'arrivée distinctes
@@ -66,7 +66,7 @@ GROUP BY destination_city_id
 ORDER BY AVG(contribution_per_passenger);
 
 
---4 Show the average price per passenger per city of departure
+--4 Afficher le prix moyen par passager par ville de départ.
 
 -- On sait le faire, la seule chose qui change et que l'on raisonne à partir de la ville de départ, qui nous est renseigné par l'attribut starting_city_id dans la table rides
 -- On comprend l'intérêt d'avoir mis les noms de villes dans une table séparée : 
@@ -84,7 +84,7 @@ GROUP BY starting_city_id, city_name;
 
 
 
---5 Compute the average price of a ride from Paris to Bruxelles
+--5 Calculer le prix moyen d'un trajet de Paris à Bruxelles.
 
 -- La difficulté de cette question n'est pas le calcul de la moyenne, maintenant on sait bien le faire
 -- La difficulté est la suivante : la table rides contient les attributs starting_city_id et destination_city_id, comme avant il manque les noms de ville
@@ -115,7 +115,7 @@ INNER JOIN cities as ct2
 	ON ct2.city_id = rides.destination_city_id
 WHERE ct1.city_name = 'Paris' AND ct2.city_name = 'Bruxelles';
 
---6 Show all the rides made with a Chrisler
+--6 Afficher tous les trajets effectués avec une Chrisler.
 
 -- On veut les informations des courses qui ont été faites avec un certain modèle
 -- Notre problème : Les informations de courses sont dans la table rides, les informations de modèle dans la table cars
@@ -136,7 +136,7 @@ INNER JOIN cars
 WHERE maker = 'Chrisler';
 
 
---7 Show all the rides from Versailles with a big luggage available
+--7 Afficher tous les trajets au départ de Versailles avec un grand bagage disponible.
 
 -- La question ressemble à la 3.5, on a deux spécificités pour les courses à afficher, le type de bagage et la vile de départ
 -- Comme les informations permettant de respecter ces spécificités sont dans les tables cities et luggage_types, on réalise les deux jointures adéquates 
@@ -151,7 +151,7 @@ INNER JOIN cities
 	ON cities.city_id = r.starting_city_id 
 WHERE cities.city_name = 'Versailles' AND  luggage_types.type = 'gros';
 
---8 Show all comments sent by a ‘Jeanine’
+--8 Afficher tous les commentaires envoyés par un utilisateur nommé "Jeanine".
 
 -- On veut afficher les commentaires situés dans la table ratings, envoyés par des membres avec prénom spécifique
 -- Les prénoms sont dans la table members, on peut donc joindre les deux tables pour obtenir le résultat
@@ -167,7 +167,7 @@ WHERE m.first_name ='Jeanine' AND r.comments != ''; -- on voit dans la doc que l
 													-- on évite donc d'afficher les commentaires 'vides' avec l'opérateur logique != (pas égal à)
 
 
---9 Select all trips that took place in France
+--9 Sélectionner tous les trajets qui ont eu lieu en France.
 
 -- Comme en 3.5, l'idée est de joindre la table rides deux fois avec la table cities, mais cette fois pour spécifier le pays de départ et d'arrivée dans le WHERE
 -- Attention à ne pas oublier les Alias
@@ -182,7 +182,7 @@ INNER JOIN cities as ct2
 	ON ct2.city_id = rides.destination_city_id
 WHERE ct1.country = 'France' AND ct2.country = 'France';
 
---10 Show all customers between 20 and 45 years old?
+--10 Afficher tous les clients âgés de 20 à 45 ans.
 
 -- Nous avons accès à la date de naissance des membres
 -- Nous verrons plus en détails les fonctions permettant de gérer les dates un peu plus tard,
@@ -198,7 +198,7 @@ WHERE  birthdate < DATE_SUB(NOW(), INTERVAL 20 YEAR)
 	AND birthdate > DATE_SUB(NOW(), INTERVAL 45 YEAR) ;
 
 
--- 11 Does the type of luggage affect the mean rating that members are giving to their rides?
+-- 11 Est-ce que le type de bagage affecte la note moyenne que les membres attribuent à leurs trajets ?
 
 -- Quelles jointures faut-il réaliser pour obtenir ce résultat ?
 -- L'information 'taille de bagage' est disponible dans la table luggage_types 
@@ -216,9 +216,12 @@ from luggage_types lt
 			on mc.member_id = m2.member_id
 				inner join ratings r2
 				on r2.rating_giver_id = m2.member_id
-group by lt.luggage_type_id; -- answer no it does not have influence on members' grades
+group by lt.luggage_type_id; -- Non, cela n'a pas d'influence sur les notes des membres.
 
--- 12 What is the most hyped destination city for each starting city?
+
+
+
+-- 12 Quelle est la ville de destination la plus prisée pour chaque ville de départ ?
 
 -- Pour trouver la réponse à cette question, on a besoin de la table rides, et deux fois de la table cities pour trouver les noms correspondants aux Ids des villes
 SELECT *
@@ -248,7 +251,7 @@ from rides r
 group by c1.City_name , c2.City_name
 order by dep,counter DESC;
 
--- 13 What car brand receives the greatest number of messages?
+-- 13 Quelle marque de voiture reçoit le plus grand nombre de messages ?
 
 -- On a besoin d'informations de cars et de messages, 
 --on doit donc joindre ces deux tables avec member_car car il n'existe pas de clef étrangère permettant de relier les deux tables qui nous intéresse directement
@@ -265,7 +268,7 @@ LEFT JOIN messages msg
 GROUP BY maker
 ORDER BY nb_messages DESC;
 
--- 14 Each car has a C02_code, can you show the repartition (as a percentage) of each CO2_code in the ride pool of blablavoiture ? 
+-- 14 Pouvez-vous fournir la répartition (en pourcentage) de chaque CO2_code dans la flotte de véhicules de Blablavoiture ? 
 
 -- Nous n'avons pas vu l'attribut C02_code pour le moment, il s'agit simplement d'une information complémentaire dans la table cars
 -- La question stipule que nous voulons la répartition de ce codeC02 sur l'ensemble des courses réalisées sur la plateforme, et non sur l'ensemble des voitures enregistrées
@@ -294,7 +297,7 @@ join rides r
 group by c.CO2_code
 order by percentage DESC;
 
--- 15	What rows intersect between the inner join of members and ratings and the Left Join of the same two tables?
+-- 15	Quelles lignes se croisent entre la jointure interne des tables "members" et "ratings" et la jointure gauche des mêmes deux tables ?
 
 -- On veut comparer deux jointures, commençons par écrire les deux :
 select *
